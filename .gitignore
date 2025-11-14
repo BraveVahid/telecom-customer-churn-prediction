@@ -1,0 +1,25 @@
+# Python & Env
+__pycache__/
+*.py[cod]
+*.so
+env/
+venv/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+
+data/
+raw_data/
+*.zip
+*.tar.gz
+
+models/*.h5
+models/*.keras
+models/*.tflite
+
+reports/*.csv
+reports/*.json
+reports/*.html
+!reports/sample_*.csv
