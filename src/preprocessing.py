@@ -87,9 +87,3 @@ def run_preprocessing():
     scaled_train, scaled_test = scale_data(x_train, x_test)
     
     return scaled_train, scaled_test, y_train
-
-
-scaled_train, scaled_test, y_train = run_preprocessing()
-print(len(scaled_train))
-print(len(scaled_test))
-print(len(y_train))
