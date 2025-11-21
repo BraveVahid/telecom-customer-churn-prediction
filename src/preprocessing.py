@@ -1,89 +1,132 @@
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder, RobustScaler, StandardScaler, MinMaxScaler
+from sklearn.model_selection import train_test_split
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from sklearn.linear_model import BayesianRidge
-from data_loader import load_data
+from imblearn.over_sampling import SMOTE
+import sys
+import os
 
 
-# Sectoin 3.2.1.
-def clean_data(train: pd.DataFrame, test: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(ROOT)
+
+from config import DATASET_PATH, X_TEST_PATH, X_TRAIN_PATH, Y_TEST_PATH, Y_TRAIN_PATH
+
+
+# Section 3.1. Dataset
+def load_data() -> pd.DataFrame:
+    data = pd.read_csv(DATASET_PATH)
+    return data
+
+
+# Section 3.2.1. Preprocessing - Data Cleaning
+def clean_data(data: pd.DataFrame) -> pd.DataFrame:
     removed_features = ["ZONE1", "ZONE2", "MRG", "user_id", "REGION", "TOP_PACK", "FREQ_TOP_PACK"]
-    
-    train = train.drop(columns=removed_features)
-    test = test.drop(columns=removed_features)
-    
-    return train, test 
+    data = data.drop(columns=removed_features)
+    return data 
 
 
-# Sectoin 3.2.2.
-def encode_data(train: pd.DataFrame, test: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+# Section 3.2.2. Preprocessing - Data Encoding
+def encode_data(data: pd.DataFrame) -> pd.DataFrame:
     categorical_cols = ["TENURE"]
     ordinal_encoder = OrdinalEncoder()
-    
-    train[categorical_cols] = ordinal_encoder.fit_transform(train[categorical_cols])
-    test[categorical_cols] = ordinal_encoder.transform(test[categorical_cols])
-    
-    return train, test
+    data[categorical_cols] = ordinal_encoder.fit_transform(data[categorical_cols])
+    return data
 
 
-# Sectoin 3.2.3.
-def impute_data(train: pd.DataFrame, test: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
-    enable_iterative_imputer
-
-    y_train = train["CHURN"]
-    x_train = train.drop(columns=["CHURN"])
-    x_test = test
-
+# Section 3.2.3. Preprocessing - Data Imputation
+def impute_data(data: pd.DataFrame) -> pd.DataFrame:
     imputer = IterativeImputer(
         estimator=BayesianRidge(),
         initial_strategy="median",
         max_iter=20,
         tol=1e-5,         
         random_state=42,
-        verbose=0
+        verbose=2
     )
-
-    x_train_imputed = imputer.fit_transform(x_train)
-    x_test_imputed = imputer.transform(x_test)
-
-    x_train = pd.DataFrame(x_train_imputed, columns=x_train.columns).round().astype(int) 
-    x_test = pd.DataFrame(x_test_imputed, columns=x_test.columns).round().astype(int) 
-        
-    return x_train, x_test, y_train
+    cols = data.columns
+    data = pd.DataFrame(imputer.fit_transform(data), columns=cols).round().astype(int)  
+    return data
 
 
-# Sectoin 3.2.4.
-def scale_data(x_train: pd.DataFrame, x_test: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    feature_columns = x_train.columns
+# Section 3.2.4. Preprocessing - Data Scaling
+def scale_data(data: pd.DataFrame) -> pd.DataFrame:
+    feature_cols = [c for c in data.columns if c != "CHURN"]
+    data[feature_cols] = RobustScaler().fit_transform(data[feature_cols])
+    data[feature_cols] = StandardScaler().fit_transform(data[feature_cols])
+    data[feature_cols] = MinMaxScaler().fit_transform(data[feature_cols])
+    return data
 
-    robust_scaler = RobustScaler()
-    x_train_scaled = robust_scaler.fit_transform(x_train)
-    x_test_scaled = robust_scaler.transform(x_test)
 
-    std_scaler = StandardScaler()
-    x_train_scaled = std_scaler.fit_transform(x_train_scaled)
-    x_test_scaled = std_scaler.transform(x_test_scaled)
-
-    min_max_scaler = MinMaxScaler()
-    x_train_scaled = min_max_scaler.fit_transform(x_train_scaled)
-    x_test_scaled = min_max_scaler.transform(x_test_scaled)
-
-    scaled_train = pd.DataFrame(x_train_scaled, columns=feature_columns)
-    scaled_test = pd.DataFrame(x_test_scaled, columns=feature_columns)
+# Section 3.3. Feature Engineering
+def create_off_net_col(data: pd.DataFrame) -> pd.DataFrame:
+    data["OFF_NET"] = data["ORANGE"] + data["TIGO"]
+    return data
     
-    return scaled_train, scaled_test
+
+# Section 3.4. Feature Selection
+def feature_selection(data: pd.DataFrame) -> pd.DataFrame:
+    selected_features = [
+        "MONTANT",
+        "FREQUENCE_RECH",
+        "REVENUE",
+        "ARPU_SEGMENT",
+        "FREQUENCE",
+        "DATA_VOLUME",
+        "ON_NET",
+        "REGULARITY",
+        "OFF_NET",
+        "TENURE",
+        "CHURN"
+    ]
+    return data[selected_features]
+
+
+# Section 3.5. Data Splitting
+def split_data(data: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+    x = data.drop("CHURN", axis=1)
+    y = data["CHURN"]
+    x_train, x_test, y_train, y_test = train_test_split(
+        x, 
+        y, 
+        test_size=0.4, 
+        random_state=42, 
+        stratify=y
+    )
+    return x_train, x_test, y_train, y_test
+
+
+# Section 3.6 - Data Balancing
+def apply_smote_balancing(x_train: pd.DataFrame, y_train: pd.Series) -> tuple[pd.DataFrame, pd.Series]:
+    smote = SMOTE(
+        sampling_strategy=0.5,
+        k_neighbors=5,
+        random_state=42
+    )
+    x_train, y_train = smote.fit_resample(x_train, y_train)
+    return x_train, y_train
 
 
 def run_preprocessing():
-    train_df, test_df = load_data()
+    data = load_data()
+    data = clean_data(data)
+    data = encode_data(data)
+    data = impute_data(data)
+    data = scale_data(data)
+    data = create_off_net_col(data)
+    data = feature_selection(data)     
+    x_train, x_test, y_train, y_test = split_data(data)
+    x_train, y_train = apply_smote_balancing(x_train, y_train)
     
-    cleaned_train, cleaned_test = clean_data(train=train_df, test=test_df)
-    
-    encoded_train, encoded_test = encode_data(train=cleaned_train, test=cleaned_test)
-    
-    x_train, x_test, y_train = impute_data(train=encoded_train, test=encoded_test)
-    
-    scaled_train, scaled_test = scale_data(x_train, x_test)
-    
-    return scaled_train, scaled_test, y_train
+    x_train.to_csv(X_TRAIN_PATH)
+    x_test.to_csv(X_TEST_PATH)
+    y_train.to_csv(Y_TRAIN_PATH)
+    y_test.to_csv(Y_TEST_PATH)
+
+    return x_train, x_test, y_train, y_test
+
+
+if __name__ == "__main__":
+    run_preprocessing()
