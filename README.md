@@ -56,6 +56,22 @@ The model was rigorously evaluated on a large test set containing **861,620 cust
 * **False Positives** (3,364 cases) were significantly lower than **False Negatives** (16,390 cases), highlighting areas where threshold tuning could further optimize churn detection.
 * Overall, the performance not only meets but **exceeds** the benchmarks established in the original study.
 
+### Confusion Matrix
+Shows the accuracy of the model in predicting whether a customer will churn or not.
+
+![Confusion Matrix](images/cm.png)
+
+### Model Performance Plot
+Visual comparison of model performance metrics.
+
+![Plot](images/plot.png)
+
+### SHAP Feature Importance
+Highlights the most important features in churn prediction using SHAP values.
+
+![SHAP Feature Importance](images/shap.png)
+
+
 
 ## 💡 Explainable AI (XAI) Analysis
 
