@@ -3,7 +3,6 @@
 <div align="center">
 
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-1.7.2-blue)
 ![Accuracy](https://img.shields.io/badge/Accuracy-97.71%25-brightgreen)
 ![Precision](https://img.shields.io/badge/Precision-97.74%25-blue)
 ![Recall](https://img.shields.io/badge/Recall-89.86%25-orange)
