@@ -4,7 +4,6 @@ from catboost import CatBoostClassifier
 from lightgbm import LGBMClassifier
 
 
-# 3.7. Proposed XAI-Churn TriBoost
 def get_triboost_model() -> VotingClassifier:
     xgb = XGBClassifier(
         n_estimators=300,
@@ -17,9 +16,10 @@ def get_triboost_model() -> VotingClassifier:
         reg_lambda=0,
         random_state=42,
         n_jobs=-1,
-        verbosity=2,
+        verbosity=0,
+        use_label_encoder=False
     )
-
+    
     cat = CatBoostClassifier(
         iterations=300,
         depth=3,
@@ -29,10 +29,10 @@ def get_triboost_model() -> VotingClassifier:
         bagging_temperature=1,
         random_strength=1,
         random_state=42,
-        verbose=1,
+        verbose=0,
         thread_count=-1,
     )
-
+    
     lgb = LGBMClassifier(
         n_estimators=200,
         max_depth=6,
@@ -44,9 +44,9 @@ def get_triboost_model() -> VotingClassifier:
         min_split_gain=1,
         random_state=42,
         n_jobs=-1,
-        verbose=1,
+        verbose=-1
     )
-
+    
     triboost = VotingClassifier(
         estimators=[
             ("xgboost", xgb),
@@ -56,5 +56,5 @@ def get_triboost_model() -> VotingClassifier:
         voting="soft",
         weights=[2, 1, 3],
     )
-
+    
     return triboost
