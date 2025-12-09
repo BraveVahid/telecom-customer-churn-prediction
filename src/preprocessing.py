@@ -67,9 +67,34 @@ def impute_data(x_train: pd.DataFrame, x_test: pd.DataFrame) -> tuple:
     x_train_imputed = imputer.fit_transform(x_train)
     x_test_imputed = imputer.transform(x_test)
     
-    x_train = pd.DataFrame(x_train_imputed, columns=train_cols).round().astype(int)
-    x_test = pd.DataFrame(x_test_imputed, columns=train_cols).round().astype(int)
+    x_train = pd.DataFrame(x_train_imputed, columns=train_cols)
+    x_test = pd.DataFrame(x_test_imputed, columns=train_cols)
     
+    return x_train, x_test
+
+
+def feature_selection(x_train: pd.DataFrame, x_test: pd.DataFrame) -> tuple:
+    selected_features = [
+        "MONTANT",
+        "FREQUENCE_RECH",
+        "REVENUE",
+        "ARPU_SEGMENT",
+        "FREQUENCE",
+        "DATA_VOLUME",
+        "ON_NET",
+        "REGULARITY",
+        "OFF_NET"
+    ]
+    
+    x_train_selected = x_train[selected_features].copy()
+    x_test_selected = x_test[selected_features].copy()
+    
+    return x_train_selected, x_test_selected
+
+
+def create_off_net_col(x_train: pd.DataFrame, x_test: pd.DataFrame) -> tuple:
+    x_train["OFF_NET"] = x_train["ORANGE"] + x_train["TIGO"]
+    x_test["OFF_NET"] = x_test["ORANGE"] + x_test["TIGO"]
     return x_train, x_test
 
 
@@ -92,32 +117,6 @@ def scale_data(x_train: pd.DataFrame, x_test: pd.DataFrame) -> tuple:
     return x_train, x_test
 
 
-def create_off_net_col(x_train: pd.DataFrame, x_test: pd.DataFrame) -> tuple:
-    x_train["OFF_NET"] = x_train["ORANGE"] + x_train["TIGO"]
-    x_test["OFF_NET"] = x_test["ORANGE"] + x_test["TIGO"]
-    return x_train, x_test
-
-
-def feature_selection(x_train: pd.DataFrame, x_test: pd.DataFrame, y_train: pd.Series) -> tuple:
-    selected_features = [
-        "MONTANT",
-        "FREQUENCE_RECH",
-        "REVENUE",
-        "ARPU_SEGMENT",
-        "FREQUENCE",
-        "DATA_VOLUME",
-        "ON_NET",
-        "REGULARITY",
-        "OFF_NET",
-        "TENURE"
-    ]
-    
-    x_train_selected = x_train[selected_features]
-    x_test_selected = x_test[selected_features]
-    
-    return x_train_selected, x_test_selected
-
-
 def apply_smote_balancing(x_train: pd.DataFrame, y_train: pd.Series) -> tuple:
     smote = SMOTE(
         sampling_strategy=0.5,
@@ -135,9 +134,9 @@ def run_preprocessing() -> tuple:
     x_train, x_test, y_train, y_test = split_data(data)
     
     x_train, x_test = impute_data(x_train, x_test)
-    x_train, x_test = scale_data(x_train, x_test)
     x_train, x_test = create_off_net_col(x_train, x_test)
-    x_train, x_test = feature_selection(x_train, x_test, y_train)
+    x_train, x_test = feature_selection(x_train, x_test)
+    x_train, x_test = scale_data(x_train, x_test)
     x_train, y_train = apply_smote_balancing(x_train, y_train)
     
     folder = os.path.dirname(X_TRAIN_PATH)
@@ -149,3 +148,6 @@ def run_preprocessing() -> tuple:
     y_test.to_csv(Y_TEST_PATH, index=False)
     
     return x_train, x_test, y_train, y_test
+
+if __name__ == "__main__":
+    run_preprocessing()
