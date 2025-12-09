@@ -17,9 +17,8 @@ def get_triboost_model() -> VotingClassifier:
         random_state=42,
         n_jobs=-1,
         verbosity=0,
-        use_label_encoder=False
     )
-    
+
     cat = CatBoostClassifier(
         iterations=300,
         depth=3,
@@ -32,7 +31,7 @@ def get_triboost_model() -> VotingClassifier:
         verbose=0,
         thread_count=-1,
     )
-    
+
     lgb = LGBMClassifier(
         n_estimators=200,
         max_depth=6,
@@ -44,9 +43,9 @@ def get_triboost_model() -> VotingClassifier:
         min_split_gain=1,
         random_state=42,
         n_jobs=-1,
-        verbose=-1
+        verbose=0,
     )
-    
+
     triboost = VotingClassifier(
         estimators=[
             ("xgboost", xgb),
@@ -56,5 +55,5 @@ def get_triboost_model() -> VotingClassifier:
         voting="soft",
         weights=[2, 1, 3],
     )
-    
+
     return triboost
