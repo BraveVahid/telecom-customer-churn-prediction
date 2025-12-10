@@ -60,7 +60,7 @@ def impute_data(x_train: pd.DataFrame, x_test: pd.DataFrame) -> tuple:
         max_iter=30,
         tol=1e-5,
         random_state=42,
-        verbose=1,
+        verbose=0,
     )
     
     train_cols = x_train.columns
