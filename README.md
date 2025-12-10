@@ -72,7 +72,6 @@ The **XAI-Churn TriBoost Ensemble** is a weighted soft voting ensemble combining
 ![DISTRO](images/3.png)
 
 ### SHAP Analysis
-Highlights the most important features in churn prediction using SHAP values.
 
 ![SHAP Feature Importance](images/4.png)
 ![SHAP VALUES](images/5.png)
