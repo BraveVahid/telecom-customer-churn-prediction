@@ -3,10 +3,10 @@
 <div align="center">
 
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
-![Accuracy](https://img.shields.io/badge/Accuracy-97.71%25-brightgreen)
-![Precision](https://img.shields.io/badge/Precision-97.74%25-blue)
-![Recall](https://img.shields.io/badge/Recall-89.86%25-orange)
-![F1-Score](https://img.shields.io/badge/F1--Score-93.63%25-purple)
+![Accuracy](https://img.shields.io/badge/Accuracy-84.99%25-brightgreen)
+![Precision](https://img.shields.io/badge/Precision-57.78%25-blue)
+![Recall](https://img.shields.io/badge/Recall-74.12%25-orange)
+![F1-Score](https://img.shields.io/badge/F1--Score-64.94%25-purple)
 
 </div>
 
@@ -25,6 +25,15 @@ The methodology and results implemented here are based on the following peer-rev
 | **Dataset** | https://zindi.africa/competitions/expresso-churn-prediction/data |
 
 
+## 💡 Critical Correction: Fixing Data Leakage
+
+This project successfully addressed a major flaw in the original methodology: **Data Leakage** during the train-test split.
+
+The problem was that transformations like **Imputation**, **Feature Engineering**, and **Scaling** were applied *before* the data was split, causing information from the test set to leak into the training process.
+
+* **Solution:** The preprocessing pipeline was reordered to **Split first**, then apply all transformations **separately** to the training and test sets.
+* **Result:** This ensures the evaluation metrics below are **true**, reflecting the model's performance on unseen data.
+
 
 ## 🤖 Core Model: XAI-Churn TriBoost Ensemble
 
@@ -40,37 +49,33 @@ The central model, **XAI-Churn TriBoost**, is a powerful ensemble classifier des
 
 ## 🚀 Performance Highlights
 
-The model was rigorously evaluated on a large test set containing **861,620 customers**. The reproduced **XAI-Churn TriBoost** model demonstrated excellent predictive capability, surpassing the benchmarks set in the original publication across all key metrics.
+The following metrics reflect the **realistic performance** of the **XAI-Churn TriBoost Ensemble** after correcting the critical data leakage issue present in the original paper's implementation.
 
-| Metric | Result (%) | Comparison to Published Paper |
-| :--- | :--- | :--- |
-| **Accuracy** | **97.71%** | **+1.31% Improvement** |
-| **Precision** | **97.74%** | **+5.30% Improvement** |
-| **Recall** | **89.86%** | **+2.32% Improvement** |
-| **F1-Score** | **93.63%** | **+3.75% Improvement** |
 
-### Detailed Summary (Test Set Performance):
-* The model correctly predicted **841,866** customers.
-* The total misclassification rate was only **2.29%**.
-* **False Positives** (3,364 cases) were significantly lower than **False Negatives** (16,390 cases), highlighting areas where threshold tuning could further optimize churn detection.
-* Overall, the performance not only meets but **exceeds** the benchmarks established in the original study.
+The **XAI-Churn TriBoost Ensemble** is a weighted soft voting ensemble combining XGBoost, CatBoost, and LightGBM. The key performance metrics achieved are:
+
+| Metric | Result |
+| :--- | :--- |
+| **Accuracy** | $84.99\%$ |
+| **Precision** | $57.78\%$ |
+| **Recall (Sensitivity)** | $74.12\%$ |
+| **F1-Score** | $64.94\%$ |
 
 ### Confusion Matrix
-Shows the accuracy of the model in predicting whether a customer will churn or not.
-
-![Confusion Matrix](images/cm.png)
+![Confusion Matrix](images/1.png)
 
 ### Model Performance Plot
-Visual comparison of model performance metrics.
 
-![Plot](images/plot.png)
+![Plot](images/2.png)
 
-### SHAP Feature Importance
+### Predicted Probability Distribution
+![DISTRO](images/3.png)
+
+### SHAP Analysis
 Highlights the most important features in churn prediction using SHAP values.
 
-![SHAP Feature Importance](images/shap.png)
-
-
+![SHAP Feature Importance](images/4.png)
+![SHAP VALUES](images/5.png)
 
 ## 💡 Explainable AI (XAI) Analysis
 
@@ -90,19 +95,19 @@ Together, these complementary XAI techniques demonstrate that the model performs
 ├── config.py                   # File paths and environment variables.
 ├── data/                       # Dataset files.
 │   ├── raw/                    # Raw dataset files.
-│   └── processed/              # Processed CSV files: x_train.csv, x_test.csv, y_train.csv, y_test.csv.
-├── src/                        # Source code for model and preprocessing.
+│   └── processed/              # Processed CSV files.
+├── src/                        # Source code for model.
 │   ├── model.py                # TriBoost ensemble definition.
-│   ├── preprocessing.py        # Data pipeline and preprocessing.
+│   ├── preprocessing.py        # Preprocessing pipeline.
 │   └── train.py                # Model training and saving utilities.
-├── models/                     # Trained model files (e.g., XAI_Churn_TriBoost.pkl).
+├── models/                     # Trained model file.
 ├── notebooks/                  # Analysis and reports.
 │   ├── exploratory_data_analysis.ipynb  # EDA on raw dataset.
 │   ├── model_evaluation_report.ipynb    # Performance analysis.
-│   └── xai_churn_analysis.ipynb        # LIME and SHAP interpretability.
-├── README.md                   # Project overview and instructions.
-├── .gitignore                  # Git ignore rules.
-└── requirements.txt            # Python dependencies.
+│   └── xai_analysis.ipynb        # LIME and SHAP interpretability.
+├── README.md
+├── .gitignore
+└── requirements.txt
 ```
 
 
@@ -144,7 +149,7 @@ Together, these complementary XAI techniques demonstrate that the model performs
     *Note: Training the ensemble may take some time.*
 
 6.  **Analyze Results:**
-    Load the generated notebooks (`model_evaluation_report.ipynb` and `xai_churn_analysis.ipynb`) in a Jupyter environment to review the detailed performance metrics, visualizations, and interpretability insights.
+    Load the generated notebooks (`model_evaluation_report.ipynb` and `xai_analysis.ipynb`) in a Jupyter environment to review the detailed performance metrics, visualizations, and interpretability insights.
 
 ## **👨‍💻 Author**
 
