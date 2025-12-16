@@ -10,7 +10,7 @@
 
 </div>
 
-This repository contains the official, fully reproducible implementation and source code related to the referenced research paper on customer churn prediction in the telecommunications industry.
+This repository contains the fully reproducible implementation and source code related to the referenced research paper on customer churn prediction in the telecommunications industry.
 
 ## 📃 Referenced Paper
 
@@ -18,22 +18,11 @@ The methodology and results implemented here are based on the following peer-rev
 
 | Detail | Description |
 | :--- | :--- |
-| **Title** | A Data-driven Approach with Explainable AI for Customer Churn Prediction |
+| **Title** | A data-driven approach with explainable artificial intelligence for customer churn prediction in the telecommunications industry |
 | **Authors** | Daniyal Asif, Muhammad Shoaib Arif, Aiman Mukheimer |
 | **Journal** | Results in Engineering, Volume 26 (2025) |
 | **DOI (Official Link)** | [https://doi.org/10.1016/j.rineng.2025.104629](https://doi.org/10.1016/j.rineng.2025.104629) |
 | **Dataset** | https://zindi.africa/competitions/expresso-churn-prediction/data |
-
-
-## 💡 Critical Correction: Fixing Data Leakage
-
-This project successfully addressed a major flaw in the original methodology: **Data Leakage** during the train-test split.
-
-The problem was that transformations like **Imputation**, **Feature Engineering**, and **Scaling** were applied *before* the data was split, causing information from the test set to leak into the training process.
-
-* **Solution:** The preprocessing pipeline was reordered to **Split first**, then apply all transformations **separately** to the training and test sets.
-* **Result:** This ensures the evaluation metrics below are **true**, reflecting the model's performance on unseen data.
-
 
 ## 🤖 Core Model: XAI-Churn TriBoost Ensemble
 
@@ -43,16 +32,15 @@ The central model, **XAI-Churn TriBoost**, is a powerful ensemble classifier des
 | :--- | :--- |
 | **Model Type** | Soft Voting Ensemble |
 | **Base Estimators** | XGBoost, CatBoost, and LightGBM |
-| **Objective** | Combines the strengths of three leading Gradient Boosting Machines (GBMs) by taking a weighted average of their predicted probabilities. (Weights are determined during optimization). |
+| **Objective** | Combines the strengths of three leading Gradient Boosting Machines (GBMs) by taking a weighted average of their predicted probabilities. |
 | **Key Preprocessing** | Data Cleaning, Iterative Imputation, Sequential Scaling (Robust → Standard → MinMax), Feature Engineering, Boruta-based Feature Selection, and **SMOTE** oversampling on the training set. |
 
 
 ## 🚀 Performance Highlights
 
-The following metrics reflect the **realistic performance** of the **XAI-Churn TriBoost Ensemble** after correcting the critical data leakage issue present in the original paper's implementation.
+The following metrics reflect the **performance** of the **XAI-Churn TriBoost Ensemble**. 
 
-
-The **XAI-Churn TriBoost Ensemble** is a weighted soft voting ensemble combining XGBoost, CatBoost, and LightGBM. The key performance metrics achieved are:
+The key performance metrics achieved are:
 
 | Metric | Result |
 | :--- | :--- |
@@ -79,7 +67,7 @@ Highlights the most important features in churn prediction using SHAP values.
 
 ## 💡 Explainable AI (XAI) Analysis
 
-This notebook presents a complete end-to-end workflow for evaluating and interpreting the XAI-Churn TriBoost customer churn prediction model using Explainable AI (XAI) techniques.
+This repo presents a complete end-to-end workflow for evaluating and interpreting the XAI-Churn TriBoost customer churn prediction model using Explainable AI (XAI) techniques.
 
 | Technique | Focus | Purpose |
 | :--- | :--- | :--- |
@@ -91,20 +79,20 @@ Together, these complementary XAI techniques demonstrate that the model performs
 ## 📂 Repository Structure
 
 ```
-├── main.py                     # Executes the full pipeline.
-├── config.py                   # File paths and environment variables.
-├── data/                       # Dataset files.
-│   ├── raw/                    # Raw dataset files.
-│   └── processed/              # Processed CSV files.
-├── src/                        # Source code for model.
-│   ├── model.py                # TriBoost ensemble definition.
-│   ├── preprocessing.py        # Preprocessing pipeline.
-│   └── train.py                # Model training and saving utilities.
-├── models/                     # Trained model file.
-├── notebooks/                  # Analysis and reports.
-│   ├── exploratory_data_analysis.ipynb  # EDA on raw dataset.
-│   ├── model_evaluation_report.ipynb    # Performance analysis.
-│   └── xai_analysis.ipynb        # LIME and SHAP interpretability.
+├── main.py
+├── config.py
+├── data/
+│   ├── raw/
+│   └── processed/
+├── src/
+│   ├── model.py
+│   ├── preprocessing.py
+│   └── train.py
+├── models/
+├── notebooks/
+│   ├── exploratory_data_analysis.ipynb
+│   ├── model_evaluation_report.ipynb
+│   └── xai_analysis.ipynb
 ├── README.md
 ├── .gitignore
 └── requirements.txt
@@ -139,7 +127,7 @@ Together, these complementary XAI techniques demonstrate that the model performs
     ```
 
 4.  **Data Configuration:**
-    The `config.py` file requires environment variables for data paths. Create a `.env` file in the project root and specify the path to your dataset (e.g., `DATASET_PATH=data/telecom_churn_data.csv`).
+    The `config.py` file requires environment variables for data paths. Create a `.env` file in the project root and specify the path to your dataset.
 
 5.  **Run the Pipeline:**
     Execute the main script to run the entire pipeline: preprocessing, feature selection, data balancing, and TriBoost model training.
