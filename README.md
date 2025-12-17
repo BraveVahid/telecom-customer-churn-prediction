@@ -44,10 +44,10 @@ The key performance metrics achieved are:
 
 | Metric | Result |
 | :--- | :--- |
-| **Accuracy** | $84.99\%$ |
-| **Precision** | $57.78\%$ |
-| **Recall (Sensitivity)** | $74.12\%$ |
-| **F1-Score** | $64.94\%$ |
+| **Accuracy** | $85.17\%$ |
+| **Precision** | $58.40\%$ |
+| **Recall (Sensitivity)** | $72.81\%$ |
+| **F1-Score** | $64.81\%$ |
 
 ### Confusion Matrix
 ![Confusion Matrix](images/1.png)

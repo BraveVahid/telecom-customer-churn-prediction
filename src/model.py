@@ -4,6 +4,7 @@ from catboost import CatBoostClassifier
 from lightgbm import LGBMClassifier
 
 
+# Section 3.7
 def get_triboost_model() -> VotingClassifier:
     xgb = XGBClassifier(
         n_estimators=300,

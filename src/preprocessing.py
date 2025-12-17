@@ -14,10 +14,12 @@ sys.path.append(ROOT)
 from config import DATASET_PATH, X_TEST_PATH, X_TRAIN_PATH, Y_TEST_PATH, Y_TRAIN_PATH
 
 
+# Section 3.1.
 def load_data() -> pd.DataFrame:
     return pd.read_csv(DATASET_PATH)
 
 
+# Section 3.2.1
 def clean_data(data: pd.DataFrame) -> pd.DataFrame:
     removed_features = [
         "ZONE1",
@@ -31,6 +33,7 @@ def clean_data(data: pd.DataFrame) -> pd.DataFrame:
     return data.drop(columns=removed_features)
 
 
+# Section 3.2.2
 def encode_data(data: pd.DataFrame) -> pd.DataFrame:
     categorical_cols = ["TENURE"]
     encoder = OrdinalEncoder()
@@ -38,66 +41,29 @@ def encode_data(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 
-def split_data(data: pd.DataFrame) -> tuple:
+# Section 3.2.3
+def impute_data(data: pd.DataFrame) -> pd.DataFrame:
     x = data.drop("CHURN", axis=1)
     y = data["CHURN"]
     
-    x_train, x_test, y_train, y_test = train_test_split(
-        x,
-        y,
-        test_size=0.4,
-        train_size=0.6,
-        random_state=42,
-        stratify=y,
-    )
-    return x_train, x_test, y_train, y_test
-
-
-def impute_data(x_train: pd.DataFrame, x_test: pd.DataFrame) -> tuple:
     imputer = IterativeImputer(
         estimator=BayesianRidge(),
         initial_strategy="median",
-        max_iter=30,
+        max_iter=20,
         tol=1e-5,
         random_state=42,
         verbose=0,
     )
     
-    train_cols = x_train.columns
-    x_train_imputed = imputer.fit_transform(x_train)
-    x_test_imputed = imputer.transform(x_test)
+    data_cols = x.columns
+    x_imputed = imputer.fit_transform(x)
     
-    x_train = pd.DataFrame(x_train_imputed, columns=train_cols)
-    x_test = pd.DataFrame(x_test_imputed, columns=train_cols)
+    x = pd.DataFrame(x_imputed, columns=data_cols)
     
-    return x_train, x_test
+    return pd.concat([x, y], axis=1)
 
 
-def feature_selection(x_train: pd.DataFrame, x_test: pd.DataFrame) -> tuple:
-    selected_features = [
-        "MONTANT",
-        "FREQUENCE_RECH",
-        "REVENUE",
-        "ARPU_SEGMENT",
-        "FREQUENCE",
-        "DATA_VOLUME",
-        "ON_NET",
-        "REGULARITY",
-        "OFF_NET"
-    ]
-    
-    x_train_selected = x_train[selected_features].copy()
-    x_test_selected = x_test[selected_features].copy()
-    
-    return x_train_selected, x_test_selected
-
-
-def create_off_net_col(x_train: pd.DataFrame, x_test: pd.DataFrame) -> tuple:
-    x_train["OFF_NET"] = x_train["ORANGE"] + x_train["TIGO"]
-    x_test["OFF_NET"] = x_test["ORANGE"] + x_test["TIGO"]
-    return x_train, x_test
-
-
+# Sectoin 3.2.4
 def scale_data(x_train: pd.DataFrame, x_test: pd.DataFrame) -> tuple:
     robust_scaler = RobustScaler()
     x_train_scaled = robust_scaler.fit_transform(x_train)
@@ -117,6 +83,49 @@ def scale_data(x_train: pd.DataFrame, x_test: pd.DataFrame) -> tuple:
     return x_train, x_test
 
 
+# Seciton 3.3.
+def create_off_net_col(data: pd.DataFrame) -> pd.DataFrame:
+    data["OFF_NET"] = data["ORANGE"] + data["TIGO"]
+    return data
+
+
+# Sectoin 3.4.
+def feature_selection(x_train: pd.DataFrame, x_test: pd.DataFrame) -> tuple:
+    selected_features = [
+        "MONTANT",
+        "FREQUENCE_RECH",
+        "REVENUE",
+        "ARPU_SEGMENT",
+        "FREQUENCE",
+        "DATA_VOLUME",
+        "ON_NET",
+        "REGULARITY",
+        "OFF_NET"
+    ]
+    
+    x_train_selected = x_train[selected_features].copy()
+    x_test_selected = x_test[selected_features].copy()
+    
+    return x_train_selected, x_test_selected
+
+
+# Section 3.5.
+def split_data(data: pd.DataFrame) -> tuple:
+    x = data.drop("CHURN", axis=1)
+    y = data["CHURN"]
+    
+    x_train, x_test, y_train, y_test = train_test_split(
+        x,
+        y,
+        test_size=0.4,
+        train_size=0.6,
+        random_state=42,
+        stratify=y,
+    )
+    return x_train, x_test, y_train, y_test
+
+
+# Sectoin 3.6.
 def apply_smote_balancing(x_train: pd.DataFrame, y_train: pd.Series) -> tuple:
     smote = SMOTE(
         sampling_strategy=0.5,
@@ -126,18 +135,17 @@ def apply_smote_balancing(x_train: pd.DataFrame, y_train: pd.Series) -> tuple:
     return smote.fit_resample(x_train, y_train)
 
 
+# Section 3 - 6
 def run_preprocessing() -> tuple:
     data = load_data()
     data = clean_data(data)
     data = encode_data(data)
-    
+    data = impute_data(data)
+    data = create_off_net_col(data)
     x_train, x_test, y_train, y_test = split_data(data)
-    
-    x_train, x_test = impute_data(x_train, x_test)
-    x_train, x_test = create_off_net_col(x_train, x_test)
     x_train, x_test = feature_selection(x_train, x_test)
-    x_train, x_test = scale_data(x_train, x_test)
     x_train, y_train = apply_smote_balancing(x_train, y_train)
+    x_train, x_test = scale_data(x_train, x_test)
     
     folder = os.path.dirname(X_TRAIN_PATH)
     os.makedirs(folder, exist_ok=True)

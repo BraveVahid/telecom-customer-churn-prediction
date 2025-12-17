@@ -17,46 +17,16 @@ def print_header():
     print("Publication: Results in Engineering 26 (2025) 104629 — Elsevier")
     print("DOI: 10.1016/j.rineng.2025.104629\n")
 
-
-def print_critical_fix():
-    print("\n==============================")
-    print(" Data Leakage Correction")
-    print("==============================\n")
-    print("Issue Identified: The original implementation had a train-test split data leakage problem.\n")
-    print("Problem: Imputation, feature engineering, and scaling were applied BEFORE splitting,")
-    print("         causing test information leakage.\n")
-    print("Solution: Split first, then apply transformations separately on train and test.\n")
-
-
 def print_preprocessing_pipeline():
     print("\n==============================")
     print(" Preprocessing Pipeline")
     print("==============================\n")
-    steps = [
-        "1. Data Cleaning — Removing irrelevant features",
-        "2. Encoding — Ordinal encoding for TENURE",
-        "3. Train-Test Split — 60-40 split (fixed position)",
-        "4. Imputation — IterativeImputer (BayesianRidge)",
-        "5. Feature Engineering — OFF_NET = ORANGE + TIGO",
-        "6. Feature Selection — 9 Boruta-confirmed features",
-        "7. Scaling — Sequential transformation",
-        "8. Balancing — SMOTE oversampling",
-    ]
-    for s in steps:
-        print(s)
-    print()
 
 
 def print_model_architecture():
     print("\n==============================")
     print(" TriBoost Ensemble Architecture")
     print("==============================\n")
-    print("Base Learners:")
-    print(" • XGBoost (weight=2): 300 est, depth=6, lr=0.1")
-    print(" • CatBoost (weight=1): 300 iter, depth=3, lr=0.1")
-    print(" • LightGBM (weight=3): 200 est, depth=6, lr=0.1")
-    print("\nEnsemble: Soft voting with weights")
-    print("Hyperparameters: RandomizedSearchCV (Table 7)\n")
 
 
 def execute_preprocessing():
@@ -105,23 +75,13 @@ def print_footer():
 
 def main():
     print_header()
-
-    print_critical_fix()
-
     print_preprocessing_pipeline()
-
     x_train, x_test, y_train, y_test = execute_preprocessing()
     display_data_summary(x_train, x_test, y_train, y_test)
-
     print_model_architecture()
-
     train_triboost(x_train, y_train)
-
     print_next_steps()
     print_footer()
-
-    print("------------------------------------------------------------\n")
-
 
 if __name__ == "__main__":
     main()
